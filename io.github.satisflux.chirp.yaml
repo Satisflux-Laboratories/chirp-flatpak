@@ -1,0 +1,41 @@
+app-id: io.github.satisflux.chirp
+runtime: org.freedesktop.Platform
+runtime-version: "25.08"
+sdk: org.freedesktop.Sdk
+command: chirp
+
+modules:
+  - name: python3.10
+    buildsystem: autotools
+    sources:
+      - type: archive
+        url: https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
+        md5: 729e36388ae9a832b01cf9138921b383
+
+  - name: wxpython
+    buildsystem: simple
+    build-commands:
+      - python3.10 -m pip install --prefix=/app attrdict3
+      - python3.10 -m pip install --prefix=/app wxPython==4.2.0
+
+  - name: chirp
+    buildsystem: simple
+    build-commands:
+      - python3.10 -m pip install --prefix=/app chirp-20250912-py3-none-any.whl
+    sources:
+      - type: file
+        dest-filename: chirp-20250912-py3-none-any.whl
+        url: https://archive.chirpmyradio.com/chirp_next/next-20250912/chirp-20250912-py3-none-any.whl
+        sha256: 23946946bc49b8ac765eec28a6a081699b56072796875f41fa23df8291fc4ab6
+
+build-options:
+  build-args:
+    - --share=network
+
+finish-args:
+  - --share=network
+  - --filesystem=home
+  - --device=all
+  - --talk-name=org.freedesktop.portal.Desktop
+  - --socket=wayland
+  - --socket=x11
