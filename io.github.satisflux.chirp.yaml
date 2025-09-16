@@ -31,6 +31,9 @@ modules:
   - name: desktop-integration
     buildsystem: simple
     build-commands:
+      - mkdir -p /app/share/metainfo/
+      - mv io.github.satisflux.chirp.metainfo.xml /app/share/metainfo/
+
       - mkdir -p /app/share/icons/hicolor/512x512/apps/
       - mv 512.png /app/share/icons/hicolor/512x512/apps/io.github.satisflux.chirp.png
 
@@ -46,7 +49,13 @@ modules:
       - mkdir -p /app/share/icons/hicolor/16x16/apps/
       - mv 16.png /app/share/icons/hicolor/16x16/apps/io.github.satisflux.chirp.png
 
+      - mkdir -p /app/share/applications/
+      - mv io.github.satisflux.chirp.desktop /app/share/applications/io.github.satisflux.chirp.desktop
+
     sources:
+      - type: file
+        path: io.github.satisflux.chirp.metainfo.xml
+
       - type: file
         path: icons/512.png
 
@@ -62,6 +71,8 @@ modules:
       - type: file
         path: icons/16.png
 
+      - type: file
+        path: io.github.satisflux.chirp.desktop
 
 build-options:
   build-args:
