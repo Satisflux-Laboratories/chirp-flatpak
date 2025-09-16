@@ -25,8 +25,8 @@ modules:
     sources:
       - type: file
         dest-filename: chirp-20250912-py3-none-any.whl
-        url: https://archive.chirpmyradio.com/chirp_next/next-20250912/chirp-20250912-py3-none-any.whl
-        sha256: 23946946bc49b8ac765eec28a6a081699b56072796875f41fa23df8291fc4ab6
+        url: <FULL_URL_HERE>
+        sha256: <SHA1_HERE>
 
   - name: desktop-integration
     buildsystem: simple
