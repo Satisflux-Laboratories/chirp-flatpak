@@ -28,6 +28,41 @@ modules:
         url: https://archive.chirpmyradio.com/chirp_next/next-20250912/chirp-20250912-py3-none-any.whl
         sha256: 23946946bc49b8ac765eec28a6a081699b56072796875f41fa23df8291fc4ab6
 
+  - name: desktop-integration
+    buildsystem: simple
+    build-commands:
+      - mkdir -p /app/share/icons/hicolor/512x512/apps/
+      - mv 512.png /app/share/icons/hicolor/512x512/apps/io.github.satisflux.chirp.png
+
+      - mkdir -p /app/share/icons/hicolor/128x128/apps/
+      - mv 128.png /app/share/icons/hicolor/128x128/apps/io.github.satisflux.chirp.png
+
+      - mkdir -p /app/share/icons/hicolor/64x64/apps/
+      - mv 64.png /app/share/icons/hicolor/64x64/apps/io.github.satisflux.chirp.png
+
+      - mkdir -p /app/share/icons/hicolor/48x48/apps/
+      - mv 48.png /app/share/icons/hicolor/48x48/apps/io.github.satisflux.chirp.png
+
+      - mkdir -p /app/share/icons/hicolor/16x16/apps/
+      - mv 16.png /app/share/icons/hicolor/16x16/apps/io.github.satisflux.chirp.png
+
+    sources:
+      - type: file
+        path: icons/512.png
+
+      - type: file
+        path: icons/128.png
+
+      - type: file
+        path: icons/64.png
+
+      - type: file
+        path: icons/48.png
+
+      - type: file
+        path: icons/16.png
+
+
 build-options:
   build-args:
     - --share=network
