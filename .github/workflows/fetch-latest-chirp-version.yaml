@@ -11,7 +11,7 @@ on:
       - main
 
 jobs:
-  upload-if-new-version:
+  build-if-new-version:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -57,11 +57,11 @@ jobs:
           cat io.github.satisflux.chirp.yaml
 
 
-#      - name: Push new version name to repo
-#        if: steps.check.outputs.new_version == 'true'
-#        run: |
-#          git config user.name "github-action"
-#          git config user.email "github-actions@github.com"
-#          git add LAST_CHIRP_VERSION.txt
-#          git commit -m "GH Action: update chirp version number"
-#          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Satisflux-Laboratories/chirp-flatpak.git main
+      - name: Push new version name to repo
+        if: steps.check.outputs.new_version == 'true'
+        run: |
+          git config user.name "github-action"
+          git config user.email "github-actions@github.com"
+          git add WHEEL_NAME.txt
+          git commit -m "GH Action: update chirp version number"
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Satisflux-Laboratories/chirp-flatpak.git main
