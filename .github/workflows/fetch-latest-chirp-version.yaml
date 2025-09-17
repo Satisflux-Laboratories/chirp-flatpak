@@ -1,3 +1,4 @@
+
 name: Fetch and Build Latest CHIRP Release
 
 permissions:
@@ -14,8 +15,16 @@ jobs:
   build-if-new-version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout main
         uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Checkout wheel-tracking
+        uses: actions/checkout@v4
+        with:
+          ref: wheel-tracking
+          path: wheel-tracking
 
       - name: Compile Scraper
         run: |
@@ -28,11 +37,11 @@ jobs:
         id: check
         run: |
           WHEEL_NAME=$(./scraper.bin --wheelName)
-          echo $WHEEL_NAME
-          FILE_NAME=$(cat WHEEL_NAME.txt)
+          echo "wheel_name=$WHEEL_NAME" >> $GITHUB_OUTPUT
+
+          FILE_NAME=$(cat wheel-tracking/WHEEL_NAME.txt)
           if [ "$WHEEL_NAME" != "$FILE_NAME" ]; then
             echo "new_version=true" >> $GITHUB_OUTPUT
-            echo $WHEEL_NAME > WHEEL_NAME.txt
           else
             echo "new_version=false" >> $GITHUB_OUTPUT
           fi
@@ -41,7 +50,7 @@ jobs:
         if: steps.check.outputs.new_version == 'true'
         run: |
           FULL_URL=$(./scraper.bin --fullURL)
-          WHEEL_NAME=$(./scraper.bin --wheelName)
+          WHEEL_NAME=${{ steps.check.outputs.wheel_name }}
 
           echo $FULL_URL
 
@@ -56,12 +65,15 @@ jobs:
 
           cat io.github.satisflux.chirp.yaml
 
-
-      - name: Push new version name to repo
+      - name: Push new version name to wheel-tracking
         if: steps.check.outputs.new_version == 'true'
         run: |
+          WHEEL_NAME=${{ steps.check.outputs.wheel_name }}
+          echo $WHEEL_NAME > wheel-tracking/WHEEL_NAME.txt
+
+          cd wheel-tracking
           git config user.name "github-action"
           git config user.email "github-actions@github.com"
           git add WHEEL_NAME.txt
           git commit -m "GH Action: update chirp version number"
-          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/Satisflux-Laboratories/chirp-flatpak.git main
+          git push origin wheel-tracking
