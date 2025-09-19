@@ -1,0 +1,25 @@
+name: Build CHIRP bundle and push to staging repo
+
+on:
+  repository_dispatch:
+    types: [chirp-new-version]
+
+  push:
+    branches:
+      - main
+
+# Vars in payload
+# ${{ github.event.client_payload.wheel_name }}
+# ${{ github.event.client_payload.url_no_wheel }}
+
+jobs:
+  build-chirp-bundle-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Build CHIRP Bundle
+        run: |
+          sudo apt update -y
+          sudo apt install -y python3.10
+          python3.10 -m pip install attrdict3
+          mkdir chirp-bundle
+          python3.10 -m pip install --prefix chirp-bundle wxPython==4.2.0
