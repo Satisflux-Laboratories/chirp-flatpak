@@ -14,11 +14,6 @@ jobs:
   check-for-new-version:
     runs-on: ubuntu-latest
 
-    outputs:
-      new_version: ${{ steps.check.outputs.new_version }}
-      wheel_name: ${{ steps.check.outputs.wheel_name }}
-      url_no_wheel: ${{ steps.check.outputs.url_no_wheel }}
-
     steps:
       - name: Checkout scraper
         uses: actions/checkout@v4
