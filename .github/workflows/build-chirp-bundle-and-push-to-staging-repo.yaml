@@ -17,19 +17,40 @@ jobs:
   build-chirp-bundle-and-push:
     runs-on: ubuntu-22.04
     steps:
-      - name: Installing Deps
+      - name: Installing Build Deps
         run: |
           sudo apt update -y
           sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
           python3 --version
 
-      - name: Build CHIRP Bundle
-        run: |
-          python3 -m pip install attrdict3
-          mkdir chirp-bundle
-          python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
+#      - name: Add Libs to CHIRP Bundle
+#        run: |
+#          python3 -m pip install attrdict3
+#          mkdir chirp-bundle
+#          python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
+      
+            
+      - name: Checkout Scraper
+        uses: actions/checkout@v4
+        with:
+          ref: scraper
+          path: scraper
 
-      - name: Make Tarball
+      - name: Compile Scraper
         run: |
-          tar -czf chirp-bundle.tgz -C chirp-bundle .
+          cd scraper
+          go build -o ../scraper.bin main.go
+          cd ..
+          chmod +x scraper.bin
+
+      - name: Fetch and add CHIRP to bundle
+        run: |
+          WHEEL_NAME=$(./scraper.bin --wheelName)
+          URL_NO_WHEEL=$(./scraper.bin --urlNoWheel)
+          curl -o $WHEEL_NAME $URL_NO_WHEEL$WHEEL_NAME
+          python3 -m pip install --prefix chirp-bundle
+
+      - name: Make CHIRP Bundle Tarball
+        run: |
+          tar -czvf chirp-bundle.tgz -C chirp-bundle .
           ls
