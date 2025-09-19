@@ -70,8 +70,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           event-type: chirp-new-version
-          client-payload: |
-            {
-              "wheel_name": "${{ steps.check.outputs.wheel_name }}",
-              "url_no_wheel": "${{ steps.check.outputs.url_no_wheel }}"
-            }
