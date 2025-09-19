@@ -1,5 +1,4 @@
-name: Push new chirp version to Satisflux flathub fork if needed
-
+name: Check for new CHIRP version
 permissions:
   contents: write
 
@@ -68,9 +67,11 @@ jobs:
           git commit -m "GH Action: update chirp version number"
           git push origin wheel-tracking
 
-  build-chirp-bundle:
-    needs: check-for-new-version
-    if: needs.check-for-new-version.outputs.new_version == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "Triggered new job with wheel ${{ needs.check-for-new-version.outputs.wheel_name }}"
+      
+      - name: Trigger downstream workflow
+        if: steps.check.outputs.new_version == 'true'
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          event-type: chirp-new-version
+          client-payload: '{"wheel_name": "${{ steps.check.outputs.wheel_name }}"}'
