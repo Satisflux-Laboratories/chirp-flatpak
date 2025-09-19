@@ -118,8 +118,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-          rm -rf staging/*
-          cp -r manifest/* staging/
+          rsync -av --exclude='.git' manifest/ staging/
           cd staging
 
           git add .
