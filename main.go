@@ -44,7 +44,7 @@ func main() {
 	collector.Visit(website)
 	wg.Wait()
 
-	if os.Args[1] == "--fullURL" {
+	if os.Args[1] == "--urlNoWheel" {
 		fmt.Print(finalURL)
 	} else if os.Args[1] == "--wheelName" {
 		fmt.Print(wheel)
