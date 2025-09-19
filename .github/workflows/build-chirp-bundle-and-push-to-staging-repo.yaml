@@ -47,7 +47,7 @@ jobs:
         run: |
           WHEEL_NAME=$(./scraper.bin --wheelName)
           URL_NO_WHEEL=$(./scraper.bin --urlNoWheel)
-          wget $URL_NO_WHEEL$WHEEL_NAME
+          wget --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:117.0) Gecko/20100101 Firefox/117.0" $URL_NO_WHEEL$WHEEL_NAME
           python3 -m pip install --prefix chirp-bundle ./$WHEEL_NAME
 
       - name: Make CHIRP Bundle Tarball
