@@ -1,6 +1,7 @@
 name: Build CHIRP bundle and push to staging repo
 
 on:
+  workflow_dispatch:
   repository_dispatch:
     types: [chirp-new-version]
 
