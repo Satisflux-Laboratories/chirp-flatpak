@@ -1,9 +1,10 @@
-name: Check for new CHIRP Release
+name: Push new chirp version to Satisflux flathub fork if needed
 
 permissions:
   contents: write
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *" # every day at midnight UTC
   push:
@@ -11,8 +12,14 @@ on:
       - main
 
 jobs:
-  build-if-new-version:
+  check-for-new-version:
     runs-on: ubuntu-latest
+
+    outputs:
+      new_version: ${{ steps.check.outputs.new_version }}
+      wheel_name: ${{ steps.check.outputs.wheel_name }}
+      url_no_wheel: ${{ steps.check.outputs.url_no_wheel }}
+
     steps:
       - name: Checkout scraper
         uses: actions/checkout@v4
@@ -37,7 +44,9 @@ jobs:
         id: check
         run: |
           WHEEL_NAME=$(./scraper.bin --wheelName)
+          URL_NO_WHEEL=$(./scraper.bin --urlNoWheel)
           echo "wheel_name=$WHEEL_NAME" >> $GITHUB_OUTPUT
+          echo "url_no_wheel=$URL_NO_WHEEL" >> $GITHUB_OUTPUT
 
           FILE_NAME=$(cat wheel-tracking/WHEEL_NAME.txt)
           if [ "$WHEEL_NAME" != "$FILE_NAME" ]; then
@@ -58,3 +67,10 @@ jobs:
           git add WHEEL_NAME.txt
           git commit -m "GH Action: update chirp version number"
           git push origin wheel-tracking
+
+  build-chirp-bundle:
+    needs: check-for-new-version
+    if: needs.check-for-new-version.outputs.new_version == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Triggered new job with wheel ${{ needs.check-for-new-version.outputs.wheel_name }}"
