@@ -63,6 +63,13 @@ jobs:
           sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev jq
           python3 --version
 
+      - name: Add wxPython to CHIRP Bundle
+        if: steps.existing.outputs.release_exists == 'false'
+        run: |
+          python3 -m pip install attrdict3
+          mkdir chirp-bundle
+          python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
+      
       - name: Fetch and add CHIRP to bundle
         if: steps.existing.outputs.release_exists == 'false'
         run: |
