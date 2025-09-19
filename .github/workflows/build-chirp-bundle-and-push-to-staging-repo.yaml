@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build-chirp-bundle-and-push:
+  build-chirp-bundle-and-upload-to-releases-if-needed:
     runs-on: ubuntu-22.04
     permissions:
       contents: write
