@@ -119,7 +119,7 @@ jobs:
         run: rsync -av --exclude='.git' manifest/ staging/
 
 
-      - name: Push to another repo
+      - name: Push to staging repo
         run: |
           cd staging
           git config user.name "github-actions"
