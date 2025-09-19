@@ -1,5 +1,4 @@
-
-name: Fetch and Build Latest CHIRP Release
+name: Check for new CHIRP Release
 
 permissions:
   contents: write
@@ -15,16 +14,11 @@ jobs:
   build-if-new-version:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      - name: Checkout scraper
         uses: actions/checkout@v4
         with:
-          ref: main
-
-      - name: Checkout wheel-tracking
-        uses: actions/checkout@v4
-        with:
-          ref: wheel-tracking
-          path: wheel-tracking
+          ref: scraper
+          path: scraper
 
       - name: Compile Scraper
         run: |
@@ -32,6 +26,12 @@ jobs:
           go build -o ../scraper.bin main.go
           cd ..
           chmod +x scraper.bin
+
+      - name: Checkout wheel-tracking
+        uses: actions/checkout@v4
+        with:
+          ref: wheel-tracking
+          path: wheel-tracking
 
       - name: Check For New CHIRP Release
         id: check
@@ -45,25 +45,6 @@ jobs:
           else
             echo "new_version=false" >> $GITHUB_OUTPUT
           fi
-
-      - name: Inject CHIRP Version in Manifest
-        if: steps.check.outputs.new_version == 'true'
-        run: |
-          FULL_URL=$(./scraper.bin --fullURL)
-          WHEEL_NAME=${{ steps.check.outputs.wheel_name }}
-
-          echo $FULL_URL
-
-          curl -o $WHEEL_NAME "$FULL_URL/$WHEEL_NAME"
-
-          SHA1=$(sha256sum ./$WHEEL_NAME | awk '{print $1}')
-
-          echo $SHA1
-
-          sed -i "s|<SHA1_HERE>|$SHA1|g" io.github.satisflux.chirp.yaml
-          sed -i "s|<FULL_URL_HERE>|$FULL_URL|g" io.github.satisflux.chirp.yaml
-
-          cat io.github.satisflux.chirp.yaml
 
       - name: Push new version name to wheel-tracking
         if: steps.check.outputs.new_version == 'true'
