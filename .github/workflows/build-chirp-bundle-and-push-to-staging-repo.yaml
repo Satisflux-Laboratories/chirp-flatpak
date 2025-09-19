@@ -77,7 +77,6 @@ jobs:
           tar -czvf chirp-bundle.tgz -C chirp-bundle .
           ls -lh chirp-bundle.tgz
 
-
       - uses: ncipollo/release-action@v1
         if: steps.existing.outputs.release_exists == 'false'
         with:
@@ -88,3 +87,34 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  push-manifest-to-staging:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout manifest branch
+        uses: actions/checkout@v4
+        with:
+          ref: manifest
+          path: manifest
+
+      - name: Checkout staging repo
+        uses: actions/checkout@v4
+        with:
+          repository: Satisflux-Laboratories/flathub
+          ref: io.github.satisflux.chirp
+          path: staging
+
+      - name: Push to another repo
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          rm -rf staging/*
+          cp -r manifest/* staging/
+          cd staging
+
+          git add .
+          git commit -m "Pushed to staging from chirp-flatpak"
+          git push origin io.github.satisflux.chirp
