@@ -36,24 +36,31 @@ jobs:
           echo "wheel_name=$WHEEL_NAME" >> $GITHUB_OUTPUT
           echo "url_no_wheel=$URL_NO_WHEEL" >> $GITHUB_OUTPUT
 
-      - name: Check for existing release by tag
+      - name: Check for existing release by tag and name
         id: existing
         run: |
           TAG=${{ steps.wheel.outputs.wheel_name }}
           resp=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github+json" \
             https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
+
           if echo "$resp" | grep -q '"Not Found"'; then
             echo "release_exists=false" >> $GITHUB_OUTPUT
           else
-            echo "release_exists=true" >> $GITHUB_OUTPUT
+            # compare release name with wheel name
+            existing_name=$(echo "$resp" | jq -r '.name')
+            if [ "$existing_name" = "$TAG" ]; then
+              echo "release_exists=true" >> $GITHUB_OUTPUT
+            else
+              echo "release_exists=false" >> $GITHUB_OUTPUT
+            fi
           fi
 
       - name: Installing Build Deps
         if: steps.existing.outputs.release_exists == 'false'
         run: |
           sudo apt update -y
-          sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
+          sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev jq
           python3 --version
 
       - name: Fetch and add CHIRP to bundle
@@ -73,10 +80,10 @@ jobs:
       - name: Create new release if needed
         if: steps.existing.outputs.release_exists == 'false'
         id: create_release
-        uses: actions/create-release@v1
+        uses: ncipollo/release-action@v1
         with:
-          tag_name: ${{ steps.wheel.outputs.wheel_name }}
-          release_name: ${{ steps.wheel.outputs.wheel_name }}
+          tag: ${{ steps.wheel.outputs.wheel_name }}
+          name: ${{ steps.wheel.outputs.wheel_name }}
           draft: false
           prerelease: false
         env:
@@ -84,9 +91,9 @@ jobs:
 
       - name: Upload tarball
         if: steps.existing.outputs.release_exists == 'false'
-        uses: actions/upload-release-asset@v1
+        uses: ncipollo/upload-release-asset@v1
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          release_tag: ${{ steps.wheel.outputs.wheel_name }}
           asset_path: ./chirp-bundle.tgz
           asset_name: chirp-bundle.tgz
           asset_content_type: application/gzip
