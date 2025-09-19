@@ -4,32 +4,17 @@ on:
   workflow_dispatch:
   repository_dispatch:
     types: [chirp-new-version]
-
   push:
     branches:
       - main
 
-# Vars in payload
-# ${{ github.event.client_payload.wheel_name }}
-# ${{ github.event.client_payload.url_no_wheel }}
-
 jobs:
   build-chirp-bundle-and-push:
     runs-on: ubuntu-22.04
-    steps:
-      - name: Installing Build Deps
-        run: |
-          sudo apt update -y
-          sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
-          python3 --version
+    permissions:
+      contents: write
 
-#      - name: Add Libs to CHIRP Bundle
-#        run: |
-#          python3 -m pip install attrdict3
-#          mkdir chirp-bundle
-#          python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
-      
-            
+    steps:
       - name: Checkout Scraper
         uses: actions/checkout@v4
         with:
@@ -43,14 +28,67 @@ jobs:
           cd ..
           chmod +x scraper.bin
 
-      - name: Fetch and add CHIRP to bundle
+      - name: Determine wheel name and path
+        id: wheel
         run: |
           WHEEL_NAME=$(./scraper.bin --wheelName)
           URL_NO_WHEEL=$(./scraper.bin --urlNoWheel)
-          wget --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:117.0) Gecko/20100101 Firefox/117.0" $URL_NO_WHEEL$WHEEL_NAME
-          python3 -m pip install --prefix chirp-bundle ./$WHEEL_NAME
+          echo "wheel_name=$WHEEL_NAME" >> $GITHUB_OUTPUT
+          echo "url_no_wheel=$URL_NO_WHEEL" >> $GITHUB_OUTPUT
+
+      - name: Check for existing release by tag
+        id: existing
+        run: |
+          TAG=${{ steps.wheel.outputs.wheel_name }}
+          resp=$(curl -s -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/${{ github.repository }}/releases/tags/$TAG)
+          if echo "$resp" | grep -q '"Not Found"'; then
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+          else
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Installing Build Deps
+        if: steps.existing.outputs.release_exists == 'false'
+        run: |
+          sudo apt update -y
+          sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
+          python3 --version
+
+      - name: Fetch and add CHIRP to bundle
+        if: steps.existing.outputs.release_exists == 'false'
+        run: |
+          wget --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:117.0) Gecko/20100101 Firefox/117.0" \
+            ${{ steps.wheel.outputs.url_no_wheel }}${{ steps.wheel.outputs.wheel_name }}
+          mkdir chirp-bundle
+          python3 -m pip install --prefix chirp-bundle ./${{ steps.wheel.outputs.wheel_name }}
 
       - name: Make CHIRP Bundle Tarball
+        if: steps.existing.outputs.release_exists == 'false'
         run: |
           tar -czvf chirp-bundle.tgz -C chirp-bundle .
-          ls
+          ls -lh chirp-bundle.tgz
+
+      - name: Create new release if needed
+        if: steps.existing.outputs.release_exists == 'false'
+        id: create_release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.wheel.outputs.wheel_name }}
+          release_name: ${{ steps.wheel.outputs.wheel_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload tarball
+        if: steps.existing.outputs.release_exists == 'false'
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./chirp-bundle.tgz
+          asset_name: chirp-bundle.tgz
+          asset_content_type: application/gzip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
