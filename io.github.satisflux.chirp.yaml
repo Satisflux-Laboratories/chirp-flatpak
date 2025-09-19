@@ -12,21 +12,11 @@ modules:
         url: https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
         md5: 729e36388ae9a832b01cf9138921b383
 
-  - name: wxpython
-    buildsystem: simple
-    build-commands:
-      - python3.10 -m pip install --prefix=/app attrdict3
-      - python3.10 -m pip install --prefix=/app wxPython==4.2.0
-
-  - name: chirp
-    buildsystem: simple
-    build-commands:
-      - python3.10 -m pip install --prefix=/app chirp-20250912-py3-none-any.whl
-    sources:
-      - type: file
-        dest-filename: chirp-20250912-py3-none-any.whl
-        url: <FULL_URL_HERE>
-        sha256: <SHA1_HERE>
+#  - name: fetch-chirp-bundle
+#    buildsystem: simple
+#    build-commands:
+#    sources:
+#      - type: archive
 
   - name: desktop-integration
     buildsystem: simple
@@ -73,10 +63,6 @@ modules:
 
       - type: file
         path: io.github.satisflux.chirp.desktop
-
-build-options:
-  build-args:
-    - --share=network
 
 finish-args:
   - --share=network
