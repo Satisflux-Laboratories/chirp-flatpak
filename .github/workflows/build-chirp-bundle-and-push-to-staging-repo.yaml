@@ -75,7 +75,6 @@ jobs:
         run: |
           wget --header="User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:117.0) Gecko/20100101 Firefox/117.0" \
             ${{ steps.wheel.outputs.url_no_wheel }}${{ steps.wheel.outputs.wheel_name }}
-          mkdir chirp-bundle
           python3 -m pip install --prefix chirp-bundle ./${{ steps.wheel.outputs.wheel_name }}
 
       - name: Make CHIRP Bundle Tarball
