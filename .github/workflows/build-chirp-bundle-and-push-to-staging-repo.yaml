@@ -77,25 +77,13 @@ jobs:
           tar -czvf chirp-bundle.tgz -C chirp-bundle .
           ls -lh chirp-bundle.tgz
 
-      - name: Create new release if needed
-        if: steps.existing.outputs.release_exists == 'false'
-        id: create_release
-        uses: ncipollo/release-action@v1
+
+      - uses: ncipollo/release-action@v1
         with:
           tag: ${{ steps.wheel.outputs.wheel_name }}
           name: ${{ steps.wheel.outputs.wheel_name }}
+          artifacts: "chirp-bundle.tgz"
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload tarball
-        if: steps.existing.outputs.release_exists == 'false'
-        uses: ncipollo/upload-release-asset@v1
-        with:
-          release_tag: ${{ steps.wheel.outputs.wheel_name }}
-          asset_path: ./chirp-bundle.tgz
-          asset_name: chirp-bundle.tgz
-          asset_content_type: application/gzip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
