@@ -17,11 +17,14 @@ jobs:
   build-chirp-bundle-and-push:
     runs-on: ubuntu-22.04
     steps:
-      - name: Build CHIRP Bundle
+      - name: Installing Deps
         run: |
           sudo apt update -y
           sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
           python3 --version
+
+      - name: Build CHIRP Bundle
+        run: |
           python3 -m pip install attrdict3
           mkdir chirp-bundle
           python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
