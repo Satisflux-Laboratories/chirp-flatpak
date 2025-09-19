@@ -114,13 +114,22 @@ jobs:
           path: staging
           token: ${{ secrets.STAGING_REPO_TOKEN }}
 
+
+      - name: Sync files to staging repo
+        run: rsync -av --exclude='.git' manifest/ staging/
+
+
       - name: Push to another repo
         run: |
-          rsync -av --exclude='.git' manifest/ staging/
-
           cd staging
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
           git add .
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit, skipping push."
+            exit 0
+          fi
+
           git commit -m "Pushed to staging from chirp-flatpak"
           git push origin io.github.satisflux.chirp
