@@ -116,12 +116,11 @@ jobs:
 
       - name: Push to another repo
         run: |
+          rsync -av --exclude='.git' manifest/ staging/
+
+          cd staging
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-
-          rsync -av --exclude='.git' manifest/ staging/
-          cd staging
-
           git add .
           git commit -m "Pushed to staging from chirp-flatpak"
           git push origin io.github.satisflux.chirp
