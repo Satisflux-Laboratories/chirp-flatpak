@@ -48,7 +48,7 @@ jobs:
           WHEEL_NAME=$(./scraper.bin --wheelName)
           URL_NO_WHEEL=$(./scraper.bin --urlNoWheel)
           curl -o $WHEEL_NAME $URL_NO_WHEEL$WHEEL_NAME
-          python3 -m pip install --prefix chirp-bundle
+          python3 -m pip install --prefix chirp-bundle ./$WHEEL_NAME
 
       - name: Make CHIRP Bundle Tarball
         run: |
