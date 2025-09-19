@@ -28,3 +28,8 @@ jobs:
           python3 -m pip install attrdict3
           mkdir chirp-bundle
           python3 -m pip install --prefix chirp-bundle wxPython==4.2.0
+
+      - name: Make Tarball
+        run: |
+          tar -czf chirp-bundle.tgz -C chirp-bundle .
+          ls
