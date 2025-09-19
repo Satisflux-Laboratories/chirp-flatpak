@@ -20,7 +20,7 @@ jobs:
       - name: Build CHIRP Bundle
         run: |
           sudo apt update -y
-          sudo apt install -y python3
+          sudo apt install -y python3 libgtk-3-dev libwebkit2gtk-4.0-dev libjpeg-dev libtiff-dev libpng-dev
           python3 --version
           python3 -m pip install attrdict3
           mkdir chirp-bundle
